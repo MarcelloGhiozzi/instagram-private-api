@@ -14,6 +14,7 @@ var Account = require('./account');
 var Media = require('./media');
 var Location = require('./location');
 var Link = require('./link');
+var Placeholder = require('./placeholder');
 var Hashtag = require('./hashtag');
 
 
@@ -27,6 +28,10 @@ ThreadItem.prototype.parseParams = function (json) {
         this.link = new Link(this.session, json.link)
     }
 
+    if(hash.type === "placeholder"){
+        hash.placeholder = 'placeholder';
+        this.placeholder = new Placeholder(this.session, json.placeholder)
+    }
     if (hash.type === "text") {
         hash.text = json.text;
     }
@@ -53,7 +58,7 @@ ThreadItem.prototype.parseParams = function (json) {
     // @Todo media preview just like profile for location and hashtag
     if (hash.type === "location") {
         var location = json.location;
-        location.location = json.location;
+        location.location = Object.create(json.location);
         location.title = location.name;
         location.subtitle = null;
         this.location = new Location(this.session, location);
@@ -71,6 +76,8 @@ ThreadItem.prototype.getParams = function() {
     var params = _.clone(this._params);
     if(params.type == 'link')
         params.link = this.link.params;
+    if(params.type == 'placeholder')
+        params.placeholder = this.placeholder.params;
     if(params.type == 'mediaShare')
         params.mediaShare = this.mediaShare.params;
     if(params.type == 'profile')
