@@ -41,7 +41,7 @@ var Session = require('./session');
 
 Request.defaultHeaders = {
     'X-IG-Connection-Type': 'WIFI',
-    'X-IG-Capabilities': '3boDAA==',
+    'X-IG-Capabilities': '3QI=',
     'Accept-Language': 'en-US',
     'Host': CONSTANTS.HOSTNAME,
     'Accept': '*/*',
@@ -372,7 +372,7 @@ Request.prototype.send = function (options, attemps) {
         .catch(function(error) {
             return that.beforeError(error, options, attemps)
         })
-        .catch(function (err) {
+        .catch(function (err){
             if (err instanceof Exceptions.APIError)
                 throw err;
             if(!err || !err.response)

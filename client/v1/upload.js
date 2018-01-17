@@ -72,10 +72,11 @@ Upload.photo = function (session, streamOrPathOrBuffer, uploadId, name, isSideca
         })
 }
 
-Upload.video = function(session,videoBufferOrPath,photoStreamOrPath,isSidecar){
+Upload.video = function(session,videoBufferOrPath,photoStreamOrPath,options){
     //Probably not the best way to upload video, best to use stream not to store full video in memory, but it's the easiest
     var predictedUploadId = new Date().getTime();
     var request = new Request(session);
+    if(!options) options = {};
     return Helpers.pathToBuffer(videoBufferOrPath)
         .then(function(buffer){
             var duration = _getVideoDurationMs(buffer);
@@ -83,14 +84,11 @@ Upload.video = function(session,videoBufferOrPath,photoStreamOrPath,isSidecar){
             var fields = {
                 upload_id: predictedUploadId
             };
-            if(isSidecar) {
-                fields['is_sidecar'] = 1;
-            } else {
-                fields['media_type'] = 2;
-                fields['upload_media_duration_ms'] = Math.floor(duration);
-                fields['upload_media_height'] = 720;
-                fields['upload_media_width'] = 720;
-            }
+            if(options.isSidecar) fields['is_sidecar'] = 1;
+            fields['media_type'] = 2;
+            fields['upload_media_duration_ms'] = Math.floor(duration);
+            fields['upload_media_height'] = options.height || 720;
+            fields['upload_media_width'] = options.width || 720;
             return request
             .setMethod('POST')
             .setBodyType('form')
@@ -115,7 +113,7 @@ Upload.video = function(session,videoBufferOrPath,photoStreamOrPath,isSidecar){
                     range:'bytes '+chunkLength+'-'+(buffer.length-1)+'/'+buffer.length
                 });
                 return Promise.mapSeries(chunks,function(chunk,i){
-                        return _sendChunkedRequest(session,uploadData.params.uploadUrl,uploadData.params.uploadJob,sessionId,chunk.data,chunk.range,isSidecar)
+                        return _sendChunkedRequest(session,uploadData.params.uploadUrl,uploadData.params.uploadJob,sessionId,chunk.data,chunk.range,options.isSidecar)
                     })
                     .then(function(results){
                         var videoUploadResult = results[results.length-1];
@@ -126,7 +124,7 @@ Upload.video = function(session,videoBufferOrPath,photoStreamOrPath,isSidecar){
                         }
                     })
                     .then(function(uploadData){
-                        return Upload.photo(session,photoStreamOrPath,uploadData.uploadId,"cover_photo_", isSidecar)
+                        return Upload.photo(session,photoStreamOrPath,uploadData.uploadId,"cover_photo_", options.isSidecar)
                             .then(function(){
                                 return uploadData;
                             })

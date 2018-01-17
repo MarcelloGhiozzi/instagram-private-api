@@ -123,8 +123,6 @@ Session.prototype.destroy = function () {
         })
 };
 
-
-
 Session.resolve2fa = function(session,username,code,identifier){
     return new Request(session)
       .setMethod('POST')
@@ -239,14 +237,7 @@ Session.login = function(session, username, password) {
             // This situation is not really obvious,
             // but even if you got checkpoint error (aka captcha or phone)
             // verification, it is still an valid session unless `sessionid` missing
-            return session.getAccountId()
-                .then(function () {
-                    // We got sessionId and accountId, we are good to go
-                    return session;
-                })
-                .catch(Exceptions.CookieNotValidError, function (e) {
-                    throw error;
-                })
+            throw error;
         })
 
 }

@@ -90,9 +90,10 @@ Relationship.getMany = function (session, accountIds) {
 Relationship.create = function (session, accountId) {
     return new Request(session)
         .setMethod('POST')
+        .setBodyType('form')
         .setResource('follow', {id: accountId})
         .generateUUID()
-        .setData({user_id: accountId})
+        .setData({user_id: accountId,radio_type:'wifi-none'})
         .signPayload()
         .send()
         .then(function(data) {
