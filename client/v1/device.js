@@ -3,7 +3,20 @@ var _ = require('lodash');
 var md5 = require('js-md5');
 
 // Thanks to @mgp25 for such a list
-var devices = require('./devices.json');
+//var devices = require('./devices.json');
+var devices = [
+          '24/7.0; 380dpi; 1080x1920; OnePlus; ONEPLUS A3010; OnePlus3T; qcom; en_US',
+
+          '23/6.0.1; 640dpi; 1440x2392; LGE/lge; RS988; h1; h1; en_US',
+
+          '24/7.0; 640dpi; 1440x2560; HUAWEI; LON-L29; HWLON; hi3660; en_US',
+
+          '23/6.0.1; 640dpi; 1440x2560; ZTE; ZTE A2017U; ailsa_ii; qcom; en_US',
+
+          '23/6.0.1; 640dpi; 1440x2560; samsung; SM-G935F; hero2lte; samsungexynos8890; en_US',
+
+          '23/6.0.1; 640dpi; 1440x2560; samsung; SM-G930F; herolte; samsungexynos8890; en_US',
+      ];
 
 
 function Device(username) {
@@ -16,14 +29,14 @@ module.exports = Device;
 
 
 Object.defineProperty(Device.prototype, "id", {
-    get: function() { 
+    get: function() {
         return 'android-' + this.md5.slice(0, 16)
     }
 });
 
 
 Object.defineProperty(Device.prototype, "md5", {
-    get: function() { 
+    get: function() {
         return md5(this.username)
     }
 });
@@ -31,40 +44,40 @@ Object.defineProperty(Device.prototype, "md5", {
 
 // Useful for getting device from csv based on line number
 Object.defineProperty(Device.prototype, "md5int", {
-    get: function() { 
+    get: function() {
         if(!this._md5int)
             this._md5int = parseInt(parseInt(this.md5, 32) / 10e32);
         return this._md5int;
     }
 });
 
-
+/*
 Object.defineProperty(Device.prototype, "api", {
-    get: function() { 
+    get: function() {
         if(!this._api)
             this._api = 18 + (this.md5int % 5);
         return this._api;
     },
-    set: function(api) { 
+    set: function(api) {
         this._api = api;
     }
 });
 
 
 Object.defineProperty(Device.prototype, "release", {
-    get: function() { 
+    get: function() {
         if(!this._release)
             this._release = ['4.0.4', '4.3.1', '4.4.4', '5.1.1', '6.0.1'][this.md5int % 5];
         return this._release;
     },
-    set: function(release) { 
+    set: function(release) {
         this._release = release;
     }
 });
 
 
 Object.defineProperty(Device.prototype, "info", {
-    get: function() { 
+    get: function() {
         if(this._info) return this._info;
         var line = devices[this.md5int % devices.length];
         var info = {
@@ -128,13 +141,17 @@ Object.defineProperty(Device.prototype, "language", {
         return this._language = lang;
     }
 });
+*/
 
+Object.defineProperty(Device.prototype, "agent", {
+  get: function() {
+    return devices[this.md5int % devices.length];
+  }
+});
 
 Device.prototype.userAgent = function(version) {
-    var agent = [this.api + "/" + this.release, this.dpi + 'dpi', 
-        this.resolution, this.info.manufacturer, this.info.model, this.info.device, this.language];    
     return CONSTANTS.instagramAgentTemplate({
-        agent: agent.join('; '),
+        agent: this.agent,
         version: version || CONSTANTS.PRIVATE_KEY.APP_VERSION
     })
 }
